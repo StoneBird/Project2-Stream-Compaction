@@ -82,7 +82,6 @@ int main(int argc, char* argv[]) {
     printf("*****************************\n");
 
     // Compaction tests
-	/*
     genArray(SIZE - 1, a, 4);  // Leave a 0 at the end to test that edge case
     a[SIZE - 1] = 0;
     printArray(SIZE, a, true);
@@ -107,8 +106,7 @@ int main(int argc, char* argv[]) {
     count = StreamCompaction::CPU::compactWithScan(SIZE, c, a);
     printArray(count, c, true);
     printCmpLenResult(count, expectedCount, b, c);
-	*/
-	/*
+
     zeroArray(SIZE, c);
     printDesc("work-efficient compact, power-of-two");
     count = StreamCompaction::Efficient::compact(SIZE, c, a);
@@ -120,5 +118,4 @@ int main(int argc, char* argv[]) {
     count = StreamCompaction::Efficient::compact(NPOT, c, a);
     //printArray(count, c, true);
     printCmpLenResult(count, expectedNPOT, b, c);
-	*/
 }
