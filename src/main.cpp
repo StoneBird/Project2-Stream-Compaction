@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     StreamCompaction::CPU::scan(NPOT, c, a);
     printArray(NPOT, b, true);
     printCmpResult(NPOT, b, c);
-
+	
     zeroArray(SIZE, c);
     printDesc("naive scan, power-of-two");
     StreamCompaction::Naive::scan(SIZE, c, a);
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
     StreamCompaction::Efficient::scan(NPOT, c, a);
     //printArray(NPOT, c, true);
     printCmpResult(NPOT, b, c);
-
+	
     zeroArray(SIZE, c);
     printDesc("thrust scan, power-of-two");
     StreamCompaction::Thrust::scan(SIZE, c, a);
@@ -82,13 +82,12 @@ int main(int argc, char* argv[]) {
     printf("*****************************\n");
 
     // Compaction tests
-
+	/*
     genArray(SIZE - 1, a, 4);  // Leave a 0 at the end to test that edge case
     a[SIZE - 1] = 0;
     printArray(SIZE, a, true);
 
     int count, expectedCount, expectedNPOT;
-
     zeroArray(SIZE, b);
     printDesc("cpu compact without scan, power-of-two");
     count = StreamCompaction::CPU::compactWithoutScan(SIZE, b, a);
@@ -108,7 +107,8 @@ int main(int argc, char* argv[]) {
     count = StreamCompaction::CPU::compactWithScan(SIZE, c, a);
     printArray(count, c, true);
     printCmpLenResult(count, expectedCount, b, c);
-
+	*/
+	/*
     zeroArray(SIZE, c);
     printDesc("work-efficient compact, power-of-two");
     count = StreamCompaction::Efficient::compact(SIZE, c, a);
@@ -120,4 +120,5 @@ int main(int argc, char* argv[]) {
     count = StreamCompaction::Efficient::compact(NPOT, c, a);
     //printArray(count, c, true);
     printCmpLenResult(count, expectedNPOT, b, c);
+	*/
 }
