@@ -34,10 +34,6 @@ All 4 implementations are ran on various array sizes from `2^4` to `2^18`. Due t
 
 ![](images/no-cpu-performance.jpg)
 
-  * Naive vs. Work-efficient
-
-![](images/custom-only-performance.jpg)
-
 * Observations
   * Theoretically work-efficient scan should be faster than a naive scan. However somehow this is not the case in performance testing with small array sizes. A profile report shows the following which might contribute to the result:
     * Up-sweep is generating 100% more memory transactions than a naive scan. Adding down-sweep process, work-efficient method has about 150% more than naive method.
@@ -213,18 +209,3 @@ Naive scan: 38.985985
 Work-efficient scan: 108.208801
 Thrust scan: 2.610464
 ```
-
-## Submit
-
-If you have modified any of the `CMakeLists.txt` files at all (aside from the
-list of `SOURCE_FILES`), you must test that your project can build in Moore
-100B/C. Beware of any build issues discussed on the Google Group.
-
-1. Open a GitHub pull request so that we can see that you have finished.
-   The title should be "Submission: YOUR NAME".
-2. Send an email to the TA (gmail: kainino1+cis565@) with:
-   * **Subject**: in the form of `[CIS565] Project 2: PENNKEY`
-   * Direct link to your pull request on GitHub
-   * In the form of a grade (0-100+) with comments, evaluate your own
-     performance on the project.
-   * Feedback on the project itself, if any.
