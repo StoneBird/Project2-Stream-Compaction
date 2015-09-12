@@ -8,7 +8,7 @@ namespace StreamCompaction {
 namespace Naive {
 
 	__global__ void scanCol(int d, int *idata){
-		int k = threadIdx.x;
+		int k = blockIdx.x*blockDim.x + threadIdx.x;
 		if (k >= (int)pow((double)2, (double)(d-1))){
 			idata[k] = idata[k - (int)pow((double)2, (double)(d - 1))] + idata[k];
 		}

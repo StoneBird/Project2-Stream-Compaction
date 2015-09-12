@@ -7,14 +7,14 @@ namespace StreamCompaction {
 namespace Efficient {
 
 	__global__ void scanUp(int d, int *idata){
-		int k = threadIdx.x;
+		int k = blockIdx.x*blockDim.x + threadIdx.x;
 		if (k % (int)pow((double)2, (double)(d + 1)) == 0){
 			idata[k - 1 + (int)pow((double)2, (double)(d + 1))] += idata[k - 1 + (int)pow((double)2, (double)d)];
 		}
 	}
 
 	__global__ void scanDown(int d, int *idata){
-		int k = threadIdx.x;
+		int k = blockIdx.x*blockDim.x + threadIdx.x;
 		if (k % (int)pow((double)2, (double)(d + 1)) == 0){
 			int t = idata[k - 1 + (int)pow((double)2, (double)d)];
 			idata[k - 1 + (int)pow((double)2, (double)d)] = idata[k - 1 + (int)pow((double)2, (double)(d + 1))];
@@ -23,7 +23,7 @@ namespace Efficient {
 	}
 
 	__global__ void filter(int *odata, int *idata){
-		int k = threadIdx.x;
+		int k = blockIdx.x*blockDim.x + threadIdx.x;
 		if (idata[k] == 0){
 			odata[k] = 0;
 		}
@@ -33,7 +33,7 @@ namespace Efficient {
 	}
 
 	__global__ void scatter(int *odata, int *idata, int *filter, int *idx){
-		int k = threadIdx.x;
+		int k = blockIdx.x*blockDim.x + threadIdx.x;
 		if (filter[k] == 1){
 			odata[idx[k]] = idata[k];
 		}

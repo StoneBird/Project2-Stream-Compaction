@@ -11,6 +11,9 @@
 #include <stream_compaction/naive.h>
 #include <stream_compaction/efficient.h>
 #include <stream_compaction/thrust.h>
+#include <stream_compaction/radix.h>
+#include <algorithm>    // std::sort
+#include <vector>       // std::vector
 #include "testing_helpers.hpp"
 
 int main(int argc, char* argv[]) {
@@ -118,4 +121,26 @@ int main(int argc, char* argv[]) {
     count = StreamCompaction::Efficient::compact(NPOT, c, a);
     //printArray(count, c, true);
     printCmpLenResult(count, expectedNPOT, b, c);
+
+	printf("\n");
+	printf("*****************************\n");
+	printf("** RADIX SORT TEST **\n");
+	printf("*****************************\n");
+
+	zeroArray(SIZE, c);
+	count = RadixSort::sort(SIZE, c, a, 8);
+
+	std::vector<int> s(a, a + SIZE);
+	std::sort(s.begin(), s.end());
+
+	int d[SIZE];
+	for (int i = 0; i < SIZE; i++){
+		d[i] = s[i];
+	}
+
+	printf("Radix sort:\n");
+	printArray(count, c, true); 
+	printf("Std sort:\n");
+    printArray(count, d, true);
+	printCmpLenResult(count, count, d, c);
 }
