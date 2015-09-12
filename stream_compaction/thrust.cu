@@ -24,7 +24,20 @@ void scan(int n, int *odata, const int *idata) {
 		hs_in[i] = idata[i];
 	}
 	dv_in = hs_in;
+
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+
+	cudaEventRecord(start);
 	thrust::exclusive_scan(dv_in.begin(), dv_in.end(), dv_out.begin());
+	cudaEventRecord(stop);
+	cudaEventSynchronize(stop);
+
+	float msAdd = 0;
+	cudaEventElapsedTime(&msAdd, start, stop);
+	printf("Thrust scan: %f\n", msAdd);
+
 	hs_out = dv_out;
 	for (int i = 0; i < n; i++){
 		odata[i] = hs_out[i];

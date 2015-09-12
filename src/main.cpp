@@ -15,6 +15,7 @@
 #include <algorithm>    // std::sort
 #include <vector>       // std::vector
 #include "testing_helpers.hpp"
+#include <chrono>
 
 int main(int argc, char* argv[]) {
     const int SIZE = 1 << 8;
@@ -124,7 +125,7 @@ int main(int argc, char* argv[]) {
 
 	printf("\n");
 	printf("*****************************\n");
-	printf("** RADIX SORT TEST **\n");
+	printf("** RADIX SORT (Single block/tile) TEST **\n");
 	printf("*****************************\n");
 
 	zeroArray(SIZE, c);
@@ -143,4 +144,37 @@ int main(int argc, char* argv[]) {
 	printf("Std sort:\n");
     printArray(count, d, true);
 	printCmpLenResult(count, count, d, c);
+
+	printf("\n");
+	printf("*****************************\n");
+	printf("** SCAN PERFORMANCE **\n");
+	printf("*****************************\n");
+
+	for (int s = 4; s < 25; s++){
+		int ssize = 1 << s;
+		int *u, *v;
+		u = (int *)malloc(ssize*sizeof(int));
+		v = (int *)malloc(ssize*sizeof(int));
+		printf("==== Array size: %d ====\n", ssize);
+		genArray(ssize, u, 50);
+
+		zeroArray(ssize, v);
+		auto start = std::chrono::high_resolution_clock::now();
+		StreamCompaction::CPU::scan(ssize, v, u);
+		auto end = std::chrono::high_resolution_clock::now();
+		double diff = std::chrono::duration_cast<std::chrono::microseconds>(end-start).count();
+		printf("CPU scan: %f\n", diff);
+
+		zeroArray(ssize, v);
+		StreamCompaction::Naive::scan(ssize, v, u);
+
+		zeroArray(ssize, v);
+		StreamCompaction::Efficient::scan(ssize, v, u);
+
+		zeroArray(ssize, v);
+		StreamCompaction::Thrust::scan(ssize, v, u);
+		free(u);
+		free(v);
+		printf("\n");
+	}
 }

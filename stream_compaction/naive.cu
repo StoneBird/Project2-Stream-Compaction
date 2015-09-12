@@ -33,10 +33,23 @@ void scan(int n, int *odata, const int *idata) {
 	int *dev_pidata;
 	cudaMalloc((void **)&dev_pidata, m*sizeof(int));
 	cudaMemcpy(dev_pidata, pidata, m*sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+
 	// Scan
+	cudaEventRecord(start);
 	for (int d = 1; d <= ilog2ceil(m); d++){
-		scanCol<<<1, m>>>(d, dev_pidata);
+		scanCol<<<4, m/4>>>(d, dev_pidata);
 	}
+	cudaEventRecord(stop);
+	cudaEventSynchronize(stop);
+
+	float msAdd = 0;
+	cudaEventElapsedTime(&msAdd, start, stop);
+	printf("Naive scan: %f\n", msAdd);
+
 	cudaMemcpy(pidata, dev_pidata, m*sizeof(int), cudaMemcpyDeviceToHost);
 	odata[0] = 0;
 	for (int i = 1; i < n; i++){

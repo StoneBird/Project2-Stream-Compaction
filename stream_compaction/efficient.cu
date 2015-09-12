@@ -58,16 +58,35 @@ void scan(int n, int *odata, const int *idata) {
 	int *dev_pidata;
 	cudaMalloc((void **)&dev_pidata, m*sizeof(int));
 	cudaMemcpy(dev_pidata, pidata, m*sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaEvent_t start, stop;
+	cudaEventCreate(&start);
+	cudaEventCreate(&stop);
+
 	// Scan
+	cudaEventRecord(start);
 	for (int d = 0; d < ilog2ceil(m); d++){
-		scanUp << <1, m>> >(d, dev_pidata);
+		scanUp << <2, (int)m/2>> >(d, dev_pidata);
 	}
+	cudaEventRecord(stop);
+	cudaEventSynchronize(stop);
+	float ms1 = 0;
+	cudaEventElapsedTime(&ms1, start, stop);
+
 	cudaMemcpy(pidata, dev_pidata, m*sizeof(int), cudaMemcpyDeviceToHost);
 	pidata[m - 1] = 0;
 	cudaMemcpy(dev_pidata, pidata, m*sizeof(int), cudaMemcpyHostToDevice);
+
+	cudaEventRecord(start);
 	for (int d = ilog2ceil(m)-1; d >=0; d--){
-		scanDown<<<1, m>>>(d, dev_pidata);
+		scanDown<<<2, (int)m/2>>>(d, dev_pidata);
 	}
+	cudaEventRecord(stop);
+	cudaEventSynchronize(stop);
+	float ms2 = 0;
+	cudaEventElapsedTime(&ms2, start, stop);
+	printf("Work-efficient scan: %f\n", (ms1+ms2));
+
 	cudaMemcpy(pidata, dev_pidata, m*sizeof(int), cudaMemcpyDeviceToHost);
 	for (int i = 0; i < n; i++){
 		odata[i] = pidata[i];

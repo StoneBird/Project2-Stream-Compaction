@@ -52,7 +52,9 @@ int compactWithScan(int n, int *odata, const int *idata) {
 	}
 	int *d, *e;
 	d = (int *)malloc(n * sizeof(int));
+
 	scan(n, d, c);
+
 	for (int i = 0; i < n; i++){
 		if (c[i] == 1){
 			odata[d[i]] = idata[i];
