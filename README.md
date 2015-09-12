@@ -6,41 +6,43 @@ CUDA Stream Compaction
 * Tongbo Sui
 * Tested on: Windows 10, i5-3320M @ 2.60GHz 8GB, NVS 5400M 2GB (Personal)
 
-## Project feature
+## Project description
 
-* Add a description of this project including a list of its features
+* Scan:
+  * CPU scan & compaction
+  * Naive scan
+  * Work-efficient scan & compaction
 
-* Radix sort
+* Radix sort:
+  * A single block/tile implementation of radix sort. Splitting and merging are not implemented
+  * Call the function as: `count = RadixSort::sort(SIZE, c, a, 8);`
+  * The function will simply write sorted result to the result array, and return the array size.
 
-```
-count = RadixSort::sort(SIZE, c, a, 8);
-```
+### Optimize block size
+Block size is optimized based on fixed array size (256) and number of blocks. `[1,2,4,8,16]` blocks are tested on each implementation
+  * Naive scan: 4 blocks / 64 threads has the best execution time
+  * Work efficient scan: 2 blocks / 128 threads has the best execution time
 
-### Questions
+### Performance
 
-* Roughly optimize the block sizes of each of your implementations for minimal
-  run time on your GPU.
-  * Naive scan:
-    * 1:m - 1:256
-    * 2:m/2 - 2:128
-    * 4:m/4 - 4:64 !!!
-    * 8:m/8 - 8:32
-    * 16:m/16 - 16:16
-  * Work efficient scan: 2:m/2 0.1117824 !!!
-
-* Performance
   * All performances
+
 ![](images/all-performance.jpg)
 
   * Exclude CPU
+
 ![](images/no-cpu-performance.jpg)
 
   * Naive vs. Work-efficient
+
 ![](images/custom-only-performance.jpg)
 
-* Write a brief explanation of the phenomena you see here.
-  * Can you find the performance bottlenecks? Is it memory I/O? Computation? Is
-    it different for each implementation?
+* Observations
+  * CPU profiling is very unstable, as C++11 `chrono` is not able to return reliable numbers from time to time. However, even under this situation it is obvious that CPU scan execution time increases dramatically as the array size grows. We would assume CPU implementation is `O(n)` and therefore array size is the performance bottleneck. 
+  * Theoretically work-efficient scan should be faster than a naive scan. However somehow this is not the case in performance testing with small array sizes. A profile report shows that up-sweep process is generating 2 times memory transactions as a naive scan. Adding down-sweep process, work-efficient method has about 2.5x as naive method. Also in general naive implementation has a better Occupancy Per SM rate, in term of number of its active blocks against device limit. All these could contribute to a faster execution of naive scan, compared to current work-efficient implementation.
+  * For the sudden performance "improvement" around `2^10`, the reason is simply because all of the available hardware resources are saturated. Since the block size is calculated based on array size over a fixed grid size, the current naive and work-efficient implementation does not handle sizes that go beyond the device limit. Namely, for naive it is `4*512=2^11` and for work-efficient `2*512=2^10`. If they were to have some routines to handle bigger sizes, the performance is expected to be similar to thrust, because the array has to be broken into tiles for calculation, and then merged back again.
+  * Thrust seems to have the best performance. As array size grows its performance goes down, and seems to be worse than naive and work-efficient methods. However as stated above, if these two methods can handle bigger sizes, thrust would still have the best performance among all. From Nsight timeline we can see that it is splitting the problem into tiles and doing work-efficient scan. Thrust runs in 40 blocks with 128 threads each, which accounts for a size of 5120, which is about `2^12`. When array size grows big, building tiles and merging results would be the major bottleneck.
+  * All of the GPU implementations are much better than a CPU one, in terms of scaling to big data set. It seems that for bigger problems, computation power is more of a serious problem than memory I/O, when such I/O are constant.
 
 * Test program output
   * The extra output `XXX scan: 0.0000000` is used for profiling the execution time of each implementation
