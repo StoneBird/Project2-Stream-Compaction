@@ -41,7 +41,7 @@ void scan(int n, int *odata, const int *idata) {
 	// Scan
 	cudaEventRecord(start);
 	for (int d = 1; d <= ilog2ceil(m); d++){
-		scanCol<<<4, m/4>>>(d, dev_pidata);
+		scanCol<<<m/64, 64>>>(d, dev_pidata);
 	}
 	cudaEventRecord(stop);
 	cudaEventSynchronize(stop);

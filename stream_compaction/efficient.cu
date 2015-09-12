@@ -66,7 +66,7 @@ void scan(int n, int *odata, const int *idata) {
 	// Scan
 	cudaEventRecord(start);
 	for (int d = 0; d < ilog2ceil(m); d++){
-		scanUp << <2, (int)m/2>> >(d, dev_pidata);
+		scanUp << <m/128, 128>> >(d, dev_pidata);
 	}
 	cudaEventRecord(stop);
 	cudaEventSynchronize(stop);
@@ -79,7 +79,7 @@ void scan(int n, int *odata, const int *idata) {
 
 	cudaEventRecord(start);
 	for (int d = ilog2ceil(m)-1; d >=0; d--){
-		scanDown<<<2, (int)m/2>>>(d, dev_pidata);
+		scanDown<<<m/128, 128>>>(d, dev_pidata);
 	}
 	cudaEventRecord(stop);
 	cudaEventSynchronize(stop);
